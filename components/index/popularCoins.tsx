@@ -39,9 +39,11 @@ export default function PopularCoins() {
     }
   }
   let formatPercentage = (value: string) => {
+    if(value == undefined || value == null || value == "") return 0;
     return Number(value).toFixed(2) + '%';
   }
   let clearLastZerosToPrice = (value: string) => {
+    if(value == undefined || value == null || value == "") return 0;
     let splitvalue = value.split('.');
     if (splitvalue.length > 1) {
       
@@ -51,6 +53,7 @@ export default function PopularCoins() {
     return value.toString();
   }
   let formatName = (value: string) => {
+    if(value == undefined || value == null || value == "") return "";
     return value.replace("USDT", "");
   }
   return (

@@ -100,6 +100,7 @@ export default function CalculatorForm() {
         }
     }
     let formatPercentage = (value: string) => {
+        if(value == undefined || value == null || value == "") return 0;
         return Number(value).toFixed(2) + '%';
     }
     let clearLastZerosToPrice = (value: string) => {
@@ -113,7 +114,8 @@ export default function CalculatorForm() {
         return value;
     }
     let totalPriceFormat = (value: number) => {
-        return value.toFixed(4);
+        if(value == undefined || value == null || value == 0) return 0;
+        return Number(value).toFixed(2).toString();
     }
     let formatName = (value: string) => {
         return value.replace("USDT", "");
