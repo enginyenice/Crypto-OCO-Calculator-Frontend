@@ -1,0 +1,14 @@
+.popularCoinBorderRight {
+    border-right: 1px solid #e6e6e6;
+    padding-left: 1%;
+}
+.popularCoinBorderRight:last-child {
+    border-right: 0;
+}
+
+@media only screen and (max-width: 990px){
+    .popularCoinBorderRight {
+        border-right: 0;
+        padding-left: 0;
+    }
+}
