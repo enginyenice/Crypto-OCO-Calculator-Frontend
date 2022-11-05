@@ -2,7 +2,7 @@ import * as React from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Grid'; // Grid version 1
+import Grid from '@mui/material/Grid'; // Grid item version 1
 import { useEffect, useState } from 'react';
 import { BinanceTickerModel } from '../../models/binanceTickerModel';
 
@@ -42,7 +42,13 @@ export default function PopularCoins() {
     return Number(value).toFixed(2) + '%';
   }
   let clearLastZerosToPrice = (value: string) => {
-    return value.replace(/0+$/, '').toString();
+    let splitvalue = value.split('.');
+    if (splitvalue.length > 1) {
+      
+        splitvalue[1] = splitvalue[1].replace(/0+$/, '');
+        value = splitvalue[0] + '.' + splitvalue[1];
+    }
+    return value.toString();
   }
   let formatName = (value: string) => {
     return value.replace("USDT", "");
@@ -51,12 +57,12 @@ export default function PopularCoins() {
     <>
       <Card sx={{ minWidth: 275 }}>
         <CardContent>
-          <Grid container>
-            {PopularCoins.map((item) => {
+          <Grid item container>
+            {PopularCoins.map((item, index) => {
               return (
-                <Grid xs={12} md={3} sm={6} className="popularCoinBorderRight">
-                  <Grid container>
-                    <Grid xs={6}>
+                <Grid key={index} item xs={12} md={3} sm={6} className="popularCoinBorderRight">
+                  <Grid item container>
+                    <Grid item xs={6}>
                       <Typography color="black" fontWeight={700}>
                         {formatName(item)}
                       </Typography>
@@ -64,7 +70,7 @@ export default function PopularCoins() {
                         $ {clearLastZerosToPrice(TikerArrayModel?.filter(p => p.s === item)[0]?.c ?? "0")}
                       </Typography>
                     </Grid>
-                    <Grid xs={6} alignItems={'center'} justifyContent={'start'} display={'flex'} >
+                    <Grid item xs={6} alignItems={'center'} justifyContent={'start'} display={'flex'} >
                       <Typography style={{ color: createColor(TikerArrayModel?.filter(p => p.s === item)[0]?.P ?? "0") }} fontWeight={700} fontSize={30}>
                         {formatPercentage(TikerArrayModel?.filter(p => p.s === item)[0]?.P ?? "#N/A")}
                       </Typography>
