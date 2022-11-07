@@ -48,33 +48,35 @@ export default function CalculatorModal(props: any) {
 
     }, [])
 
-    const [OCOForm, setOCOForm] = useState({ "symbol": "BTCUSDT", "price": 0, "quantity": 0, "ocoPercentage": 0 });
-    
-    
-    const changePrice = (changeEvent : any) => { 
-        setOCOForm({ ...OCOForm, price: Number(changeEvent.target.value) });
+    const [OCOForm, setOCOForm] = useState(new OCOFormModel());
+
+
+    const changePrice = (changeEvent: any) => {
+        setOCOForm({ ...OCOForm, price: Number(changeEvent.target.value ?? 0) });
     }
-    const changeQuantity = (changeEvent : any) => {
-        setOCOForm({ ...OCOForm, quantity: Number(changeEvent.target.value) });
+    const changeQuantity = (changeEvent: any) => {
+        setOCOForm({ ...OCOForm, quantity: Number(changeEvent.target.value ?? 0) });
     }
-    const changeOCOPercentage = (changeEvent : any) => {
-        setOCOForm({ ...OCOForm, ocoPercentage: Number(changeEvent.target.value) });
+    const changeOCOPercentage = (changeEvent: any) => {
+        setOCOForm({ ...OCOForm, ocoPercentage: Number(changeEvent.target.value ?? 0) });
     }
     const saveOCO = () => {
         console.log(OCOForm);
-        let OCOList : Array<OCOFormModel> = JSON.parse(localStorage.getItem('OCOList') as string);
+        let OCOList: Array<OCOFormModel> = JSON.parse(localStorage.getItem('OCOList') as string);
+        if (OCOForm === null || OCOForm === undefined || OCOForm.symbol === undefined) { return; }
 
-        if(OCOList !== null){
+        if (OCOList !== null) {
             OCOList.push(OCOForm);
-        }else {
+        } else {
             OCOList = new Array<OCOFormModel>();
             OCOList.push(OCOForm);
         }
         localStorage.setItem('OCOList', JSON.stringify(OCOList));
-        props.FormDataAdd();    
+        props.FormDataAdd();
     }
 
     const handleClose = () => props.ChangeModal(false);
+    const handleClear = () => setOCOForm(new OCOFormModel());
     return (
         <Modal
             open={props.OpenModal}
@@ -93,8 +95,8 @@ export default function CalculatorModal(props: any) {
                             id="combo-box-demo"
                             options={SymbolList}
                             onChange={(event: any, newValue: string | null) => {
-                                setOCOForm({ ...OCOForm, symbol: newValue ?? 'BTCUSDT' });
-                              }}
+                                setOCOForm({ ...OCOForm, symbol: newValue === null || newValue === undefined ? 'BTCUSDT' : newValue });
+                            }}
                             renderInput={(params) => <TextField {...params} label="Symbol" />}
                         />
                     </Grid>
@@ -155,6 +157,9 @@ export default function CalculatorModal(props: any) {
                 </Grid>
                 <Grid item container sx={{ mt: 2 }}>
                     <Grid item xs={12} justifyContent={"end"} display={"flex"}>
+                        {/* Clear Button */}
+                        <Button sx={{ mr: 2 }} variant="contained" color={'error'} onClick={handleClear}>Clear</Button>
+
                         {/* Cancel Button */}
                         <Button sx={{ mr: 2 }} variant="contained" color={'error'} onClick={handleClose}>Cancel</Button>
 
