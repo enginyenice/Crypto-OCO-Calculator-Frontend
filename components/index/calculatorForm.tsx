@@ -271,9 +271,7 @@ export default function CalculatorForm() {
         };
 
         wss.onclose = function (event: any) {
-            setTimeout(function () {
-                wssConnection();
-            }, 1000);
+            wssConnection();
         }
 
         wss.onerror = function (event: any) {
