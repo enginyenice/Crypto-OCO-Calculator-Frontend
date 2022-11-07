@@ -10,23 +10,7 @@ export default function PopularCoins() {
   const [TikerArrayModel, setTikerArrayModel] = useState<Array<BinanceTickerModel>>();
   const [PopularCoins, SetPopularCoins] = useState(["BTCUSDT", "ETHUSDT", "BNBUSDT", "LINKUSDT",])
   useEffect(() => {
-    let wss = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
-    wss.onmessage = function (event: any) {
-      let tempObj: Array<BinanceTickerModel> | undefined = JSON.parse(event.data);
-      if (TikerArrayModel === undefined) {
-        setTikerArrayModel(JSON.parse(event.data));
-      } else {
-
-        tempObj?.forEach(element => {
-          let findIndex = TikerArrayModel?.findIndex(x => x.s == element.s);
-          if (findIndex != undefined && findIndex != -1) {
-            TikerArrayModel?.splice(findIndex, 1, element);
-          } else {
-            TikerArrayModel?.push(element);
-          }
-        });
-      }
-    }
+    wssConnection();
   }, [])
 
   let createColor = (value: string) => {
@@ -88,4 +72,35 @@ export default function PopularCoins() {
       </Card>
     </>
   )
+
+  function wssConnection() {
+    let wss = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
+    wss.onmessage = function (event: any) {
+      let tempObj: Array<BinanceTickerModel> | undefined = JSON.parse(event.data);
+      if (TikerArrayModel === undefined) {
+        setTikerArrayModel(JSON.parse(event.data));
+      } else {
+
+        tempObj?.forEach(element => {
+          let findIndex = TikerArrayModel?.findIndex(x => x.s == element.s);
+          if (findIndex != undefined && findIndex != -1) {
+            TikerArrayModel?.splice(findIndex, 1, element);
+          } else {
+            TikerArrayModel?.push(element);
+          }
+        });
+      }
+    };
+
+    wss.onclose = function (event: any) {
+      setTimeout(function () {
+          wssConnection();
+      }, 1000);
+  }
+
+  wss.onerror = function (event: any) {
+      wss.close();
+  }
+  
+  }
 }

@@ -24,70 +24,7 @@ export default function CalculatorForm() {
     const [Total, setTotal] = useState<TotalModel>({ total: 0, ocoLimitTotal: 0, ocoStopTotal: 0, lastTotal: 0 });
     useEffect(() => {
 
-        let wss = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
-        wss.onmessage = function (event: any) {
-            let tempTotal: TotalModel = { total: 0, ocoLimitTotal: 0, ocoStopTotal: 0, lastTotal: 0 };
-            let savedSymbol: Array<OCOFormModel> = JSON.parse(localStorage.getItem("OCOList") || "[]");
-            let tempObj: Array<BinanceTickerModel> | undefined = JSON.parse(event.data);
-            if (savedSymbol === undefined || savedSymbol.length == 0) {
-                setTotal(tempTotal);
-                return;
-            }
-
-            let tempOcoTable = OCOTableModelList;
-            savedSymbol.forEach(element => {
-                if (OCOTableModelList.findIndex(x => x.symbol == element.symbol) == -1) {
-                    let ocoTableModel = new OCOTableModel();
-                    ocoTableModel.symbol = element.symbol;
-                    ocoTableModel.price = element.price;
-                    ocoTableModel.ocoPercentage = element.ocoPercentage;
-                    ocoTableModel.ocoLimitPrice = (100 + element.ocoPercentage) * element.price / 100;
-                    ocoTableModel.ocoStopPrice = (100 - element.ocoPercentage) * element.price / 100;
-                    ocoTableModel.quantity = element.quantity;
-                    tempOcoTable.push(ocoTableModel);
-                    setOCOTableModelList(tempOcoTable);
-                }
-            });
-
-
-            let tempOcoTableModelList: Array<OCOTableModel> = [];
-            OCOTableModelList.forEach(element => {
-                let symbol = tempObj?.find(x => x.s == element.symbol);
-                let savedSymbolFind = savedSymbol?.find(x => x.symbol == element.symbol);
-                if (symbol !== undefined && savedSymbolFind !== undefined) {
-                    element.lastPrice = symbol.c;
-                    element.ocoLimitPrice = (100 + element.ocoPercentage) * element.price / 100;
-                    element.ocoLimitTotal = element.ocoLimitPrice * element.quantity;
-                    element.ocoStopPrice = (100 - element.ocoPercentage) * element.price / 100;
-                    element.ocoStopTotal = element.ocoStopPrice * element.quantity;
-                    element.total = Number(element.lastPrice) * element.quantity;
-                    element.percentage = symbol.P;
-                    element.ocoProfitLoss = ((Number(element.lastPrice) * 100) / element.price) - 100;
-
-
-                }
-                if (savedSymbolFind !== undefined) {
-                    tempOcoTableModelList.push(element);
-                }
-
-            });
-            tempOcoTableModelList.forEach(element => {
-                tempTotal.total += element.quantity * element.price;
-                tempTotal.lastTotal += element.total;
-                tempTotal.ocoLimitTotal += element.ocoLimitTotal;
-                tempTotal.ocoStopTotal += element.ocoStopTotal;
-            })
-            setOCOTableModelList(tempOcoTableModelList);
-            setTotal(tempTotal);
-
-
-
-
-
-
-
-
-        }
+        wssConnection();
     }, [])
 
     let createColor = (value: string) => {
@@ -100,11 +37,11 @@ export default function CalculatorForm() {
         }
     }
     let formatPercentage = (value: string) => {
-        if(value == undefined || value == null || value == "") return 0;
+        if (value == undefined || value == null || value == "") return 0;
         return Number(value).toFixed(2) + '%';
     }
     let clearLastZerosToPrice = (value: string) => {
-        if(value == undefined || value == null || value == "") return 0;
+        if (value == undefined || value == null || value == "") return 0;
         value = Number(value).toFixed(8).toString();
         let splitvalue = value.toString().split('.');
         if (splitvalue.length > 1) {
@@ -114,7 +51,7 @@ export default function CalculatorForm() {
         return value;
     }
     let totalPriceFormat = (value: number) => {
-        if(value == undefined || value == null || value == 0) return 0;
+        if (value == undefined || value == null || value == 0) return 0;
         return Number(value).toFixed(2).toString();
     }
     let formatName = (value: string) => {
@@ -183,19 +120,19 @@ export default function CalculatorForm() {
                                             <Typography fontWeight={700}>
                                                 {row.price}
                                             </Typography>
-                                            
+
                                         </TableCell>
                                         <TableCell align="right" component="td" scope="row">
                                             <Typography fontWeight={700}>
                                                 {row.quantity}
                                             </Typography>
-                                            
+
                                         </TableCell>
                                         <TableCell align="right" component="td" scope="row">
                                             <Typography fontWeight={700}>
                                                 {totalPriceFormat(row.total)}
                                             </Typography>
-                                            
+
                                         </TableCell>
                                         <TableCell style={{ color: createColor(row.percentage) }} align="right" component="td" scope="row">
                                             <Typography fontWeight={700}>
@@ -266,4 +203,81 @@ export default function CalculatorForm() {
 
         </>
     );
+
+    function wssConnection() {
+        let wss = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
+        wss.onmessage = function (event: any) {
+            let tempTotal: TotalModel = { total: 0, ocoLimitTotal: 0, ocoStopTotal: 0, lastTotal: 0 };
+            let savedSymbol: Array<OCOFormModel> = JSON.parse(localStorage.getItem("OCOList") || "[]");
+            let tempObj: Array<BinanceTickerModel> | undefined = JSON.parse(event.data);
+            if (savedSymbol === undefined || savedSymbol.length == 0) {
+                setTotal(tempTotal);
+                return;
+            }
+
+            let tempOcoTable = OCOTableModelList;
+            savedSymbol.forEach(element => {
+                if (OCOTableModelList.findIndex(x => x.symbol == element.symbol) == -1) {
+                    let ocoTableModel = new OCOTableModel();
+                    ocoTableModel.symbol = element.symbol;
+                    ocoTableModel.price = element.price;
+                    ocoTableModel.ocoPercentage = element.ocoPercentage;
+                    ocoTableModel.ocoLimitPrice = (100 + element.ocoPercentage) * element.price / 100;
+                    ocoTableModel.ocoStopPrice = (100 - element.ocoPercentage) * element.price / 100;
+                    ocoTableModel.quantity = element.quantity;
+                    tempOcoTable.push(ocoTableModel);
+                    setOCOTableModelList(tempOcoTable);
+                }
+            });
+
+
+            let tempOcoTableModelList: Array<OCOTableModel> = [];
+            OCOTableModelList.forEach(element => {
+                let symbol = tempObj?.find(x => x.s == element.symbol);
+                let savedSymbolFind = savedSymbol?.find(x => x.symbol == element.symbol);
+                if (symbol !== undefined && savedSymbolFind !== undefined) {
+                    element.lastPrice = symbol.c;
+                    element.ocoLimitPrice = (100 + element.ocoPercentage) * element.price / 100;
+                    element.ocoLimitTotal = element.ocoLimitPrice * element.quantity;
+                    element.ocoStopPrice = (100 - element.ocoPercentage) * element.price / 100;
+                    element.ocoStopTotal = element.ocoStopPrice * element.quantity;
+                    element.total = Number(element.lastPrice) * element.quantity;
+                    element.percentage = symbol.P;
+                    element.ocoProfitLoss = ((Number(element.lastPrice) * 100) / element.price) - 100;
+
+
+                }
+                if (savedSymbolFind !== undefined) {
+                    tempOcoTableModelList.push(element);
+                }
+
+            });
+            tempOcoTableModelList.forEach(element => {
+                tempTotal.total += element.quantity * element.price;
+                tempTotal.lastTotal += element.total;
+                tempTotal.ocoLimitTotal += element.ocoLimitTotal;
+                tempTotal.ocoStopTotal += element.ocoStopTotal;
+            });
+            setOCOTableModelList(tempOcoTableModelList);
+            setTotal(tempTotal);
+
+
+
+
+
+
+
+
+        };
+
+        wss.onclose = function (event: any) {
+            setTimeout(function () {
+                wssConnection();
+            }, 1000);
+        }
+
+        wss.onerror = function (event: any) {
+            wss.close();
+        }
+    }
 }
